@@ -25,13 +25,13 @@ if __name__ == "__main__":
             frame_count = 0
 
         print("downloading latest optimized model")
-        # artifact = run.use_artifact('trt-model:latest')
-        # artifact_dir = artifact.download()
+        artifact = run.use_artifact('trt-model:latest')
+        artifact_dir = artifact.download()
 
         print("loading state dict")
         model_trt = TRTModule()
-        # model_trt.load_state_dict(torch.load(os.path.join(artifact_dir, 'trt-model.pth')))
-        model_trt.load_state_dict(torch.load('trt-model.pth'))
+        model_trt.load_state_dict(torch.load(os.path.join(artifact_dir, 'trt-model.pth')))
+        # model_trt.load_state_dict(torch.load('trt-model.pth'))
         # model_trt.load_state_dict(torch.load('../jetracer/notebooks/road_following_model_trt.pth'))
 
         print("setting up car and camera")
@@ -42,6 +42,8 @@ if __name__ == "__main__":
         STEERING_GAIN = -1
         print("all set")
         try:
+            ii = 0
+            jj = 0
             while True:
                 image = camera.read()
                 start = time.time()
@@ -54,6 +56,10 @@ if __name__ == "__main__":
                 y = float(output[1])
                 car.steering = STEERING_GAIN*x # *(y+1)/2
 
+                run.log({"car/steering": car.steering, "car/throttle": car.throttle}, step=jj)
+                jj += 1
+                
+
                 if run.config.debug: 
                     frame_count += 1
                     if frame_count % run.config.debug_freq == 0:
@@ -62,7 +68,8 @@ if __name__ == "__main__":
                         y = int((y + 1)/2*224)
                         cv2.circle(unprocessed, (x,y), 5, (0, 255, 0), 2)
                         unprocessed = cv2.cvtColor(unprocessed, cv2.COLOR_BGR2RGB)
-                        wandb.log({"current_frame": wandb.Image(unprocessed)}) 
+                        run.log({"frame_idx": ii, "inference/frame": wandb.Image(unprocessed)}, step=ii) 
+                        ii += 1
 
                     if frame_count == run.config.framerate*run.config.debug_time:
                         print("frame count: ", frame_count)
@@ -75,6 +82,3 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             pass
             
-            
-            
-
