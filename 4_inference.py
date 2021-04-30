@@ -4,7 +4,7 @@ import time
 import torch
 import wandb
 import argparse
-from utils import preprocess
+from utils.utils import preprocess
 from torch2trt import TRTModule
 from jetcam.csi_camera import CSICamera
 from jetracer.nvidia_racecar import NvidiaRacecar
@@ -16,10 +16,12 @@ if __name__ == "__main__":
     parser.add_argument("--debug", type=bool, default=False)
     parser.add_argument("--debug_time", type=int, default=120, help="how long should it run for in seconds")
     parser.add_argument("--debug_freq", type=int, default=10, help="how many frame between each logged image")
+    parser.add_argument("--project", type=str, default="racecar")
+    parser.add_argument("--entity", type=str, default=None)
     # TODO add policy as a param
     args = parser.parse_args()
 
-    with wandb.init(project="wandb-jetracer", job_type="inference", config=args) as run:
+    with wandb.init(project=args.project, job_type="inference", config=args, entity=args.entity) as run:
         if run.config.debug:
             print("Debug mode enabled")
             frame_count = 0
@@ -56,7 +58,7 @@ if __name__ == "__main__":
                 y = float(output[1])
                 car.steering = STEERING_GAIN*x # *(y+1)/2
 
-                run.log({"car/steering": car.steering, "car/throttle": car.throttle}, step=jj)
+                run.log({"car_log_idx": jj, "car/steering": car.steering, "car/throttle": car.throttle})
                 jj += 1
                 
 
@@ -68,7 +70,7 @@ if __name__ == "__main__":
                         y = int((y + 1)/2*224)
                         cv2.circle(unprocessed, (x,y), 5, (0, 255, 0), 2)
                         unprocessed = cv2.cvtColor(unprocessed, cv2.COLOR_BGR2RGB)
-                        run.log({"frame_idx": ii, "inference/frame": wandb.Image(unprocessed)}, step=ii) 
+                        run.log({"frame_idx": ii, "inference/frame": wandb.Image(unprocessed)}) 
                         ii += 1
 
                     if frame_count == run.config.framerate*run.config.debug_time:
@@ -77,7 +79,7 @@ if __name__ == "__main__":
                         print("end debug")
                         break
                 end = time.time()
-                wandb.log({"system/inference_seconds": (end-start)})
+                wandb.log({"inference/seconds": (end-start)})
                 # print(x)
         except KeyboardInterrupt:
             pass
