@@ -27,20 +27,20 @@ if __name__ == "__main__":
             frame_count = 0
 
         print("downloading latest optimized model")
-        artifact = run.use_artifact('trt-model:latest')
-        artifact_dir = artifact.download()
+        # artifact = run.use_artifact('trt-model:latest')
+        # artifact_dir = artifact.download()
 
         print("loading state dict")
         model_trt = TRTModule()
-        model_trt.load_state_dict(torch.load(os.path.join(artifact_dir, 'trt-model.pth')))
+        # model_trt.load_state_dict(torch.load(os.path.join(artifact_dir, 'trt-model.pth')))
         # model_trt.load_state_dict(torch.load('trt-model.pth'))
-        # model_trt.load_state_dict(torch.load('../jetracer/notebooks/road_following_model_trt.pth'))
+        model_trt.load_state_dict(torch.load('../jetracer/notebooks/road_following_model_trt.pth'))
 
         print("setting up car and camera")
         car = NvidiaRacecar()
         camera = CSICamera(width=224, height=224, capture_fps=run.config.framerate)
 
-        car.throttle = -0.001
+        car.throttle = -0.005
         STEERING_GAIN = -1
         print("all set")
         try:
