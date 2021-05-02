@@ -5,7 +5,7 @@ import torchvision
 from torch2trt import torch2trt
 
 if __name__ == "__main__":
-    with wandb.init(project="wandb-jetracer", job_type="trt-optimization") as run:
+    with wandb.init(project="racecar", job_type="trt-optimization", entity="wandb") as run:
         
         print("downloading non optimized model")
         artifact = run.use_artifact('model:latest')
