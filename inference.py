@@ -1,4 +1,5 @@
 import argparse
+import logging
 import time
 
 import cv2
@@ -16,11 +17,11 @@ STEERING_GAIN = -1
 
 def setup(config):
 
-    print("downloading latest optimized model")
+    logging.info("Downloading latest optimized model...")
     # artifact = run.use_artifact('trt-model:latest')
     # artifact_dir = artifact.download()
 
-    print("loading state dict")
+    logging.info("loading state dict")
     model_trt = TRTModule()
     # model_trt.load_state_dict(torch.load(
     #     os.path.join(artifact_dir, 'trt-model.pth')
@@ -30,7 +31,7 @@ def setup(config):
         torch.load("../jetracer/notebooks/road_following_model_trt.pth")
     )
 
-    print("setting up car and camera")
+    logging.info("setting up car and camera")
     car = NvidiaRacecar()
     camera = CSICamera(
         width=224, height=224, capture_fps=config.framerate
@@ -40,10 +41,10 @@ def setup(config):
 
 
 def drive(car, camera, model_trt, config):
+    logging.debug("Debug mode enabled")
     if config.debug:
-        print("Debug mode enabled")
         frame_count = 0
-    print("Starting to drive")
+    logging.info("Starting to drive")
     ii = 0
     jj = 0
     car.throttle = config.throttle*THROTTLE_GAIN
@@ -71,7 +72,7 @@ def drive(car, camera, model_trt, config):
         if config.debug:
             frame_count += 1
             if frame_count % config.debug_freq == 0:
-                print("logging image")
+                logging.debug("logging image")
                 x = int((x + 1) / 2 * 224)
                 y = int((y + 1) / 2 * 224)
                 cv2.circle(unprocessed, (x, y), 5, (0, 255, 0), 2)
@@ -88,8 +89,8 @@ def drive(car, camera, model_trt, config):
 
             is_done = frame_count == config.framerate * config.debug_seconds
             if is_done:
-                print("frame count: ", frame_count)
-                print("end debug")
+                logging.debug("frame count: ", frame_count)
+                logging.debug("end debug")
                 break
         end = time.time()
         wandb.log({"inference/seconds": (end - start)})
@@ -104,6 +105,11 @@ def main(args):
     ) as run:
 
         config = run.config
+        logging_level = logging.DEBUG if config.debug else logging.INFO
+        logging.basicConfig(
+            format='%(levelname)s:%(message)s',
+            level=logging_level
+        )
 
         car, camera, model_trt = setup(config)
 
