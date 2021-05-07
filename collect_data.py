@@ -22,7 +22,9 @@ if __name__ == "__main__":
 
         config = run.config
 
+        # first pull the latest version of the dataset to create the new one
         os.makedirs(config.out_dir, exist_ok=True)
+
 
         print("Setting up camera...")
         camera = CSICamera(width=config.img_size, height=config.img_size, capture_fps=config.framerate) 
