@@ -1,13 +1,14 @@
-import os
-import cv2
+import argparse
 import time
+
+import cv2
 import torch
 import wandb
-import argparse
-from utils.utils import preprocess
-from torch2trt import TRTModule
+
 from jetcam.csi_camera import CSICamera
 from jetracer.nvidia_racecar import NvidiaRacecar
+from utils.utils import preprocess
+from torch2trt import TRTModule
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -49,7 +50,9 @@ if __name__ == "__main__":
 
         print("loading state dict")
         model_trt = TRTModule()
-        # model_trt.load_state_dict(torch.load(os.path.join(artifact_dir, 'trt-model.pth')))
+        # model_trt.load_state_dict(torch.load(
+        #     os.path.join(artifact_dir, 'trt-model.pth')
+        # ))
         # model_trt.load_state_dict(torch.load('trt-model.pth'))
         model_trt.load_state_dict(
             torch.load("../jetracer/notebooks/road_following_model_trt.pth")
