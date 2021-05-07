@@ -12,7 +12,7 @@ def click_event(event, x, y, flags, path):
     if event == cv2.EVENT_LBUTTONDOWN:
         # displaying the coordinates
         # on the Shell
-        print(x, ' ', y)
+        print(x, " ", y)
         # rename image
         print(path)
         fname = os.path.basename(path)
@@ -23,16 +23,16 @@ def click_event(event, x, y, flags, path):
         os.rename(path, os.path.join(directory, fname))
         tmp = img.copy()
         cv2.circle(tmp, (x, y), 5, (0, 255, 0), 2)
-        cv2.imshow('image', tmp)
+        cv2.imshow("image", tmp)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='tool to label images for regression'
+        description="tool to label images for regression"
     )
-    parser.add_argument('--project', type=str, default="racecar")
-    parser.add_argument('--entity', type=str, default=None)
-    parser.add_argument('dataset', type=str, default=None)
+    parser.add_argument("--project", type=str, default="racecar")
+    parser.add_argument("--entity", type=str, default=None)
+    parser.add_argument("dataset", type=str, default=None)
 
     args = parser.parse_args()
 
@@ -40,19 +40,17 @@ if __name__ == "__main__":
         project=args.project,
         config=args,
         entity=args.entity,
-        job_type="labelling"
+        job_type="labelling",
     ) as run:
 
         config = run.config
 
         # TODO check if latest tag needed
-        artifact_loc = '{entity}/{proj}/{ds}:latest'.format(
-            entity=config.entity,
-            proj=config.project,
-            ds=config.dataset
+        artifact_loc = "{entity}/{proj}/{ds}:latest".format(
+            entity=config.entity, proj=config.project, ds=config.dataset
         )
         print("downloading ", artifact_loc)
-        dataset = run.use_artifact(artifact_loc, type='dataset')
+        dataset = run.use_artifact(artifact_loc, type="dataset")
         artifact_dir = dataset.download()
 
         try:
@@ -65,11 +63,11 @@ if __name__ == "__main__":
                     print(fname)
 
                     # displaying the image
-                    cv2.imshow('image', img)
+                    cv2.imshow("image", img)
 
                     # setting mouse handler for the image
                     # and calling the click_event() function
-                    cv2.setMouseCallback('image', click_event, path)
+                    cv2.setMouseCallback("image", click_event, path)
 
                     # wait for any key to be pressed
                     cv2.waitKey(0)
