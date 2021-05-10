@@ -55,33 +55,61 @@ def main(args):
         config = run.config
 
         camera, output_dir = setup(config)
-
         collect_images(camera, output_dir, config)
 
         dataset = wandb.Artifact(config.dataset_name, type="dataset")
-
         # add images to artifact
         dataset.add_dir(output_dir)
-
         # log artifact to wandb
         run.log_artifact(dataset)
 
 
 def parse_args():
+    # TODO: find where these number belong?
+    default_nb_imgs = 120
+    default_framerate = 2
+    default_img_size = 224
+    default_entity = None
+    default_project = "racecar"
+
     parser = argparse.ArgumentParser(
-        description="Collect images and upload them to wandb"
+        description="Collect square images and upload them to wandb."
     )
-    parser.add_argument("dataset_name", type=str)
+    parser.add_argument(
+        "dataset_name",
+        type=str,
+        help="The name of the dataset artifact to add to."
+    )
     parser.add_argument(
         "--nb_imgs",
         type=int,
-        default=120,
-        help="how many images you want to collect",
+        default=default_nb_imgs,
+        help=f"Number of images to collect. Default: {default_nb_imgs}",
     )
-    parser.add_argument("--framerate", type=int, default=2)
-    parser.add_argument("--img_size", type=int, default=224)
-    parser.add_argument("--entity", type=str, default=None)
-    parser.add_argument("--project", type=str, default="racecar")
+    parser.add_argument(
+        "--framerate",
+        type=int,
+        default=default_framerate,
+        help=f"Number of images to collect/s. Default: {default_framerate}"
+    )
+    parser.add_argument(
+        "--img_size",
+        type=int,
+        default=default_img_size,
+        help=f"Size of the images to collect. Default: {default_img_size}"
+    )
+    parser.add_argument(
+        "--entity",
+        type=str,
+        default=default_entity,
+        help=f"Which entity owns the project. Default: {default_entity} (you)"
+    )
+    parser.add_argument(
+        "--project",
+        type=str,
+        default=default_project,
+        help=f"Project the dataset belongs to. Default: {default_project}"
+    )
 
     return parser.parse_args()
 
