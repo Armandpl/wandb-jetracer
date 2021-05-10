@@ -1,12 +1,73 @@
-import os
-import cv2
-import uuid
-import wandb
 import argparse
+import logging
+import os
+import uuid
+
+import cv2
 from tqdm import tqdm
+import wandb
+
 from jetcam.csi_camera import CSICamera
 
-if __name__ == "__main__":
+
+def collect_images(camera, output_dir, config):
+    logging.info("Collecting images...")
+
+    for _ in tqdm(range(config.nb_imgs)):
+        image = camera.read()
+        fname = create_img_name()
+        cv2.imwrite(os.path.join(output_dir, fname), image)
+
+
+def setup(config):
+    try:
+        # first pull the latest version of the dataset to add to it
+        artifact = wandb.use_artifact(f"{config.dataset_name}:latest")
+        artifact_dir = artifact.download()
+        logging.info("Dataset already exists, adding to it")
+    except wandb.errors.CommError:
+        logging.info("Dataset doesn't exist yet, creating it")
+        artifact_dir = config.dataset_name
+        os.makedirs(artifact_dir, exist_ok=False)
+
+    logging.info("Setting up camera...")
+
+    camera = CSICamera(
+        width=config.img_size,
+        height=config.img_size,
+        capture_fps=config.framerate,
+    )
+    return camera, artifact_dir
+
+
+def create_img_name():
+    return str(uuid.uuid1()) + ".jpg"
+
+
+def main(args):
+    with wandb.init(
+        project=args.project,
+        config=args,
+        job_type="collect-data",
+        entity=args.entity,
+    ) as run:
+
+        config = run.config
+
+        camera, output_dir = setup(config)
+
+        collect_images(camera, output_dir, config)
+
+        dataset = wandb.Artifact(config.dataset_name, type="dataset")
+
+        # add images to artifact
+        dataset.add_dir(output_dir)
+
+        # log artifact to wandb
+        run.log_artifact(dataset)
+
+
+def parse_args():
     parser = argparse.ArgumentParser(
         description="Collect images and upload them to wandb"
     )
@@ -19,42 +80,12 @@ if __name__ == "__main__":
     )
     parser.add_argument("--framerate", type=int, default=2)
     parser.add_argument("--img_size", type=int, default=224)
-    parser.add_argument("--out_dir", type=str, default="./data")
     parser.add_argument("--entity", type=str, default=None)
     parser.add_argument("--project", type=str, default="racecar")
 
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    with wandb.init(
-        project=args.project,
-        config=args,
-        job_type="collect-data",
-        entity=args.entity,
-    ) as run:
 
-        config = run.config
-
-        # first pull the latest version of the dataset to create the new one
-        os.makedirs(config.out_dir, exist_ok=True)
-
-        print("Setting up camera...")
-        camera = CSICamera(
-            width=config.img_size,
-            height=config.img_size,
-            capture_fps=config.framerate,
-        )
-
-        count_imgs = 0
-
-        dataset = wandb.Artifact(config.dataset_name, type="dataset")
-
-        print("Collecting images...")
-        for _ in tqdm(range(config.nb_imgs)):
-            image = camera.read()
-            fname = str(uuid.uuid1()) + ".jpg"
-            cv2.imwrite(os.path.join(config.out_dir, fname), image)
-
-        # add images to artifact
-        dataset.add_dir(config.out_dir)
-        # log artifact to wandb
-        run.log_artifact(dataset)
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)
