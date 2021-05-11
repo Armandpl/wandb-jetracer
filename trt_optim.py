@@ -1,26 +1,33 @@
+import argparse
+import logging
 import os
+
 import torch
-import wandb
 import torchvision
+import wandb
+
 from torch2trt import torch2trt
 
-if __name__ == "__main__":
+
+def main(args):
     with wandb.init(
-        project="racecar", job_type="trt-optimization", entity="wandb"
+        project=args.project,
+        config=args,
+        job_type="trt-optimization",
+        entity=args.entity
     ) as run:
 
-        print("downloading non optimized model")
+        logging.info("downloading non optimized model")
         artifact = run.use_artifact("model:latest")
         artifact_dir = artifact.download()
 
-        print("creating model architecture")
+        logging.info("creating model architecture")
         # fetching the model architecture from the producer run
         producer_run = artifact.logged_by()
         model = torchvision.models.__dict__[
             producer_run.config["architecture"]
         ](pretrained=False)
 
-        device = torch.device("cuda")
         model.fc = torch.nn.Linear(model.fc.in_features, 2)
         model = model.cuda().eval().half()
         model.load_state_dict(
@@ -43,3 +50,31 @@ if __name__ == "__main__":
         trt_artifact = wandb.Artifact("trt-model", type="model")
         trt_artifact.add_file("trt-model.pth")
         run.log_artifact(trt_artifact)
+
+
+def parse_args():
+    default_entity = None
+    default_project = "racecar"
+
+    parser = argparse.ArgumentParser(
+        description="Pull the latest trained model, optimize it and log it."
+    )
+    parser.add_argument(
+        "--entity",
+        type=str,
+        default=default_entity,
+        help=f"Which entity owns the project. Default {default_entity} (you)"
+    )
+    parser.add_argument(
+        "--project",
+        type=str,
+        default=default_project,
+        help=f"Project the dataset belongs to. Default {default_project}"
+    )
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)
