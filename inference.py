@@ -117,7 +117,6 @@ def main(args):
 
 
 def parse_args():
-    default_entity = None
     parser = argparse.ArgumentParser(
         description="Run the optimized model on the car",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -156,8 +155,8 @@ def parse_args():
         "-e"
         "--entity",
         type=str,
-        default=default_entity,
-        help=f"Entity the project belongs to. Default {default_entity} (you)."
+        default=None,
+        help="Entity the project belongs to. None = you."
     )
     parser.add_argument(
         "--throttle",

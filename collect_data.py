@@ -73,8 +73,6 @@ def main(args):
 
 
 def parse_args():
-    default_entity = None
-
     parser = argparse.ArgumentParser(
         description="Collect square images and upload them to wandb.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -107,8 +105,8 @@ def parse_args():
         "-e",
         "--entity",
         type=str,
-        default=default_entity,
-        help="Which entity owns the project. Default {default_entity} (you)"
+        default=None,
+        help="Which entity owns the project. None = you"
     )
     parser.add_argument(
         "--project",
