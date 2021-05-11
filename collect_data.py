@@ -81,6 +81,7 @@ def parse_args():
         help="The name of the dataset artifact to add to."
     )
     parser.add_argument(
+        "-n",
         "--nb_imgs",
         type=int,
         default=default_nb_imgs,
@@ -99,6 +100,7 @@ def parse_args():
         help=f"Size of the images to collect. Default {default_img_size}"
     )
     parser.add_argument(
+        "-e",
         "--entity",
         type=str,
         default=default_entity,
