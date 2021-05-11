@@ -53,23 +53,21 @@ def main(args):
 
 
 def parse_args():
-    default_entity = None
-    default_project = "racecar"
-
     parser = argparse.ArgumentParser(
-        description="Pull the latest trained model, optimize it and log it."
+        description="Pull the latest trained model, optimize it and log it.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
         "--entity",
         type=str,
-        default=default_entity,
-        help=f"Which entity owns the project. Default {default_entity} (you)"
+        default=None,
+        help="Which entity owns the project. None = you"
     )
     parser.add_argument(
         "--project",
         type=str,
-        default=default_project,
-        help=f"Project the dataset belongs to. Default {default_project}"
+        default="racecar",
+        help="Project the dataset belongs to."
     )
 
     return parser.parse_args()
