@@ -4,11 +4,16 @@ import wandb
 
 def main(args):
     with wandb.init(
-        project=args.project, job_type="upload-dataset", entity=args.entity
+        project=args.project,
+        config=args,
+        job_type="upload-dataset",
+        entity=args.entity
     ) as run:
 
+        config = run.config
+
         artifact = wandb.Artifact(
-            run.config.name,
+            config.name,
             type="dataset",
             description="Images of the racetrack from the car pov."
                         "With the center of the track annotated.",
@@ -18,7 +23,7 @@ def main(args):
             },
         )
 
-        artifact.add_dir(args.directory)
+        artifact.add_dir(config.directory)
 
         run.log_artifact(artifact)
 
