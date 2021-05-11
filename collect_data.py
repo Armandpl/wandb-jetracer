@@ -84,31 +84,31 @@ def parse_args():
         "--nb_imgs",
         type=int,
         default=default_nb_imgs,
-        help=f"Number of images to collect. Default: {default_nb_imgs}",
+        help=f"Number of images to collect. Default {default_nb_imgs}",
     )
     parser.add_argument(
         "--framerate",
         type=int,
         default=default_framerate,
-        help=f"Number of images to collect/s. Default: {default_framerate}"
+        help=f"Number of images to collect/s. Default {default_framerate}"
     )
     parser.add_argument(
         "--img_size",
         type=int,
         default=default_img_size,
-        help=f"Size of the images to collect. Default: {default_img_size}"
+        help=f"Size of the images to collect. Default {default_img_size}"
     )
     parser.add_argument(
         "--entity",
         type=str,
         default=default_entity,
-        help=f"Which entity owns the project. Default: {default_entity} (you)"
+        help=f"Which entity owns the project. Default {default_entity} (you)"
     )
     parser.add_argument(
         "--project",
         type=str,
         default=default_project,
-        help=f"Project the dataset belongs to. Default: {default_project}"
+        help=f"Project the dataset belongs to. Default {default_project}"
     )
 
     return parser.parse_args()
