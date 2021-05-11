@@ -29,11 +29,9 @@ def main(args):
 
 
 def parse_args():
-    default_project = "racecar"
-    default_entity = None
-
     parser = argparse.ArgumentParser(
-        description="Upload directory/dataset to wandb"
+        description="Upload directory/dataset to wandb",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
         "directory",
@@ -47,16 +45,16 @@ def parse_args():
     )
     parser.add_argument(
         "--project",
-        default=default_project,
+        default="racecar",
         type=str,
-        help="Wandb project in which to upload the artifact. "
-             f"Default {default_project}",
+        help="Wandb project in which to upload the artifact."
     )
     parser.add_argument(
+        "-e",
         "--entity",
         type=str,
-        default=default_entity,
-        help=f"Entity the project belongs to. Default {default_entity} (you)"
+        default=None,
+        help="Entity the project belongs to. None = you"
     )
 
     return parser.parse_args()

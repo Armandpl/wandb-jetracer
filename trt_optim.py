@@ -6,6 +6,7 @@ import torch
 import torchvision
 import wandb
 
+from utils.utils import setup_logging
 from torch2trt import torch2trt
 
 
@@ -16,6 +17,7 @@ def main(args):
         job_type="trt-optimization",
         entity=args.entity
     ) as run:
+        setup_logging()
 
         logging.info("downloading non optimized model")
         artifact = run.use_artifact("model:latest")
@@ -58,6 +60,7 @@ def parse_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
+        "-e",
         "--entity",
         type=str,
         default=None,
