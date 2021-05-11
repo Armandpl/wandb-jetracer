@@ -9,6 +9,7 @@ import wandb
 from jetcam.csi_camera import CSICamera
 from jetracer.nvidia_racecar import NvidiaRacecar
 from utils.utils import preprocess
+from utils.utils import setup_logging
 from torch2trt import TRTModule
 
 THROTTLE_GAIN = -1
@@ -105,11 +106,7 @@ def main(args):
     ) as run:
 
         config = run.config
-        logging_level = logging.DEBUG if config.debug else logging.INFO
-        logging.basicConfig(
-            format='%(levelname)s:%(message)s',
-            level=logging_level
-        )
+        setup_logging(config)
 
         car, camera, model_trt = setup(config)
 
@@ -120,12 +117,23 @@ def main(args):
 
 
 def parse_args():
+    default_entity = None
     parser = argparse.ArgumentParser(
-        description="Run the optimized model on the car"
+        description="Run the optimized model on the car",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
-    parser.add_argument("--framerate", type=int, default=10)
-    parser.add_argument("--debug", type=bool, default=False)
+    parser.add_argument(
+        "--framerate",
+        type=int,
+        default=10,
+        help="How many images to analyze per second"
+    )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true"
+    )
     parser.add_argument(
         "--debug_seconds",
         type=int,
@@ -136,10 +144,21 @@ def parse_args():
         "--debug_freq",
         type=int,
         default=10,
-        help="how many frame between each logged image",
+        help="How many frames between each logged image",
     )
-    parser.add_argument("--project", type=str, default="racecar")
-    parser.add_argument("--entity", type=str, default=None)
+    parser.add_argument(
+        "--project",
+        type=str,
+        default="racecar",
+        help="In which project to log this run"
+    )
+    parser.add_argument(
+        "-e"
+        "--entity",
+        type=str,
+        default=default_entity,
+        help=f"Entity the project belongs to. Default {default_entity} (you)."
+    )
     parser.add_argument(
         "--throttle",
         type=float,
