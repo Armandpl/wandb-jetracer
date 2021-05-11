@@ -8,7 +8,7 @@ import wandb
 
 from jetcam.csi_camera import CSICamera
 from jetracer.nvidia_racecar import NvidiaRacecar
-from utils.utils import preprocess
+from utils.xy_dataset import preprocess
 from utils.utils import setup_logging
 from torch2trt import TRTModule
 
