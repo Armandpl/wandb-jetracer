@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import sys
 import uuid
 
 import cv2
@@ -8,6 +9,7 @@ from tqdm import tqdm
 import wandb
 
 from jetcam.csi_camera import CSICamera
+from utils.utils import setup_logging
 
 
 def collect_images(camera, output_dir, config):
@@ -28,7 +30,12 @@ def setup(config):
     except wandb.errors.CommError:
         logging.info("Dataset doesn't exist yet, creating it")
         artifact_dir = config.dataset_name
-        os.makedirs(artifact_dir, exist_ok=False)
+        try:
+            os.makedirs(artifact_dir, exist_ok=False)
+        except FileExistsError:
+            logging.error(f"Local directory {artifact_dir} shouldn't exist. "
+                          "Please delete/rename it.")
+            sys.exit(0)
 
     logging.info("Setting up camera...")
 
@@ -53,6 +60,7 @@ def main(args):
     ) as run:
 
         config = run.config
+        setup_logging()
 
         camera, output_dir = setup(config)
         collect_images(camera, output_dir, config)
@@ -65,15 +73,11 @@ def main(args):
 
 
 def parse_args():
-    # TODO: find where these number belong?
-    default_nb_imgs = 120
-    default_framerate = 2
-    default_img_size = 224
     default_entity = None
-    default_project = "racecar"
 
     parser = argparse.ArgumentParser(
-        description="Collect square images and upload them to wandb."
+        description="Collect square images and upload them to wandb.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
         "dataset_name",
@@ -84,33 +88,33 @@ def parse_args():
         "-n",
         "--nb_imgs",
         type=int,
-        default=default_nb_imgs,
-        help=f"Number of images to collect. Default {default_nb_imgs}",
+        default=120,
+        help="Total number of images to collect.",
     )
     parser.add_argument(
         "--framerate",
         type=int,
-        default=default_framerate,
-        help=f"Number of images to collect/s. Default {default_framerate}"
+        default=2,
+        help="Number of images to collect/s."
     )
     parser.add_argument(
         "--img_size",
         type=int,
-        default=default_img_size,
-        help=f"Size of the images to collect. Default {default_img_size}"
+        default=224,
+        help="Size of the images to collect."
     )
     parser.add_argument(
         "-e",
         "--entity",
         type=str,
         default=default_entity,
-        help=f"Which entity owns the project. Default {default_entity} (you)"
+        help="Which entity owns the project. Default {default_entity} (you)"
     )
     parser.add_argument(
         "--project",
         type=str,
-        default=default_project,
-        help=f"Project the dataset belongs to. Default {default_project}"
+        default="racecar",
+        help="Project the dataset belongs to."
     )
 
     return parser.parse_args()
