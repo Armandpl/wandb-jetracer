@@ -6,6 +6,7 @@ import torch
 import torchvision
 import wandb
 
+from utils.utils import setup_logging
 from torch2trt import torch2trt
 
 
@@ -16,6 +17,7 @@ def main(args):
         job_type="trt-optimization",
         entity=args.entity
     ) as run:
+        setup_logging()
 
         logging.info("downloading non optimized model")
         artifact = run.use_artifact("model:latest")
@@ -53,23 +55,22 @@ def main(args):
 
 
 def parse_args():
-    default_entity = None
-    default_project = "racecar"
-
     parser = argparse.ArgumentParser(
-        description="Pull the latest trained model, optimize it and log it."
+        description="Pull the latest trained model, optimize it and log it.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
+        "-e",
         "--entity",
         type=str,
-        default=default_entity,
-        help=f"Which entity owns the project. Default {default_entity} (you)"
+        default=None,
+        help="Which entity owns the project. None = you"
     )
     parser.add_argument(
         "--project",
         type=str,
-        default=default_project,
-        help=f"Project the dataset belongs to. Default {default_project}"
+        default="racecar",
+        help="Project the dataset belongs to."
     )
 
     return parser.parse_args()
