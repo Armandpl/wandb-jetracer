@@ -15,6 +15,7 @@ from torch2trt import TRTModule
 
 THROTTLE_GAIN = -1
 STEERING_GAIN = -1
+IMG_SIZE = 224
 
 
 def setup(config):
@@ -29,72 +30,89 @@ def setup(config):
             os.path.join(artifact_dir, 'trt-model.pth')
         ))
     else:
-        logging.info("Using local model: {config.local_model}")
+        logging.info(f"Using local model: {config.local_model}")
         model_trt.load_state_dict(torch.load(config.local_model))
 
-    logging.info("setting up car and camera")
+    logging.info("Setting up car and camera")
     car = NvidiaRacecar()
     camera = CSICamera(
-        width=224, height=224, capture_fps=config.framerate
+        width=IMG_SIZE, height=IMG_SIZE, capture_fps=config.framerate
     )
 
     return car, camera, model_trt
 
 
+def control_policy(road_center, config):
+    x, y = road_center
+    steering = x * STEERING_GAIN  # *(y+1)/2
+    throttle = config.throttle * THROTTLE_GAIN
+
+    return throttle, steering
+
+
+def infer(image, model_trt):
+    image = preprocess(image).half()
+    output = model_trt(image).squeeze()  # .detach().cpu().numpy().flatten()
+    x, y = float(output[0]), float(output[1])
+
+    return x, y
+
+
+def show_label(image, coordinates):
+    x, y = coordinates
+
+    x = int((x + 1) / 2 * 224)
+    y = int((y + 1) / 2 * 224)
+    cv2.circle(image, (x, y), 5, (0, 255, 0), 2)
+    image = cv2.cvtColor(
+        image, cv2.COLOR_BGR2RGB
+    )
+
+    return image
+
+
 def drive(car, camera, model_trt, config):
     logging.debug("Debug mode enabled")
-    if config.debug:
-        frame_count = 0
     logging.info("Starting to drive")
-    ii = 0
-    jj = 0
-    car.throttle = config.throttle*THROTTLE_GAIN
+
+    frame_count = 0
+
     while True:
         image = camera.read()
-        start = time.time()
+        inference_start = time.time()
+        debug_log = {}
+
         if config.debug:
             unprocessed = image.copy()
 
-        image = preprocess(image).half()
-        output = model_trt(image).detach().cpu().numpy().flatten()
-        x = float(output[0])
-        y = float(output[1])
-        car.steering = STEERING_GAIN * x  # *(y+1)/2
-
-        wandb.log(
-            {
-                "car_log_idx": jj,
-                "car/steering": car.steering,
-                "car/throttle": car.throttle,
-            }
-        )
-        jj += 1
+        x, y = infer(image, model_trt)
+        car.throttle, car.steering = control_policy((x, y), config)
 
         if config.debug:
             frame_count += 1
             if frame_count % config.debug_freq == 0:
                 logging.debug("logging image")
-                x = int((x + 1) / 2 * 224)
-                y = int((y + 1) / 2 * 224)
-                cv2.circle(unprocessed, (x, y), 5, (0, 255, 0), 2)
-                unprocessed = cv2.cvtColor(
-                    unprocessed, cv2.COLOR_BGR2RGB
-                )
-                wandb.log(
-                    {
-                        "frame_idx": ii,
-                        "inference/frame": wandb.Image(unprocessed),
-                    }
-                )
-                ii += 1
+                unprocessed = show_label(unprocessed, (x, y))
+                debug_log = {
+                    "inference/frame": wandb.Image(unprocessed),
+                }
 
             is_done = frame_count == config.framerate * config.debug_seconds
             if is_done:
                 logging.debug("frame count: ", frame_count)
                 logging.debug("end debug")
                 break
-        end = time.time()
-        wandb.log({"inference/seconds": (end - start)})
+
+        inference_end = time.time()
+        inference_seconds = (inference_end - inference_start)
+
+        log = {
+            "inference/seconds": inference_seconds,
+            "car/steering": car.steering,
+            "car/throttle": car.throttle,
+        }
+
+        wandb.log({**log, **debug_log})
 
 
 def main(args):
@@ -152,7 +170,7 @@ def parse_args():
         help="In which project to log this run"
     )
     parser.add_argument(
-        "-e"
+        "-e",
         "--entity",
         type=str,
         default=None,
