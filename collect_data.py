@@ -21,6 +21,31 @@ def collect_images(camera, output_dir, config):
         cv2.imwrite(os.path.join(output_dir, fname), image)
 
 
+def create_img_name():
+    return str(uuid.uuid1()) + ".jpg"
+
+
+def main(args):
+    with wandb.init(
+        project=args.project,
+        config=args,
+        job_type="collect-data",
+        entity=args.entity,
+    ) as run:
+
+        config = run.config
+        setup_logging()
+
+        camera, output_dir = setup(config)
+        collect_images(camera, output_dir, config)
+
+        dataset = wandb.Artifact(config.dataset_name, type="dataset")
+        # add images to artifact
+        dataset.add_dir(output_dir)
+        # log artifact to wandb
+        run.log_artifact(dataset)
+
+
 def setup(config):
     try:
         # first pull the latest version of the dataset to add to it
@@ -45,31 +70,6 @@ def setup(config):
         capture_fps=config.framerate,
     )
     return camera, artifact_dir
-
-
-def create_img_name():
-    return str(uuid.uuid1()) + ".jpg"
-
-
-def main(args):
-    with wandb.init(
-        project=args.project,
-        config=args,
-        job_type="collect-data",
-        entity=args.entity,
-    ) as run:
-
-        config = run.config
-        setup_logging()
-
-        camera, output_dir = setup(config)
-        collect_images(camera, output_dir, config)
-
-        dataset = wandb.Artifact(config.dataset_name, type="dataset")
-        # add images to artifact
-        dataset.add_dir(output_dir)
-        # log artifact to wandb
-        run.log_artifact(dataset)
 
 
 def parse_args():
