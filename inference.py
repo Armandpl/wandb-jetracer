@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 import time
 
 import cv2
@@ -18,19 +19,18 @@ STEERING_GAIN = -1
 
 def setup(config):
 
-    logging.info("Downloading latest optimized model...")
-    # artifact = run.use_artifact('trt-model:latest')
-    # artifact_dir = artifact.download()
-
-    logging.info("loading state dict")
     model_trt = TRTModule()
-    # model_trt.load_state_dict(torch.load(
-    #     os.path.join(artifact_dir, 'trt-model.pth')
-    # ))
-    # model_trt.load_state_dict(torch.load('trt-model.pth'))
-    model_trt.load_state_dict(
-        torch.load("../jetracer/notebooks/road_following_model_trt.pth")
-    )
+
+    if config.local_model is None:
+        logging.info("Downloading latest optimized model...")
+        artifact = wandb.use_artifact('trt-model:latest')
+        artifact_dir = artifact.download()
+        model_trt.load_state_dict(torch.load(
+            os.path.join(artifact_dir, 'trt-model.pth')
+        ))
+    else:
+        logging.info("Using local model: {config.local_model}")
+        model_trt.load_state_dict(torch.load(config.local_model))
 
     logging.info("setting up car and camera")
     car = NvidiaRacecar()
@@ -163,6 +163,11 @@ def parse_args():
         type=float,
         default=0.005,
         help="Car throttle. Between 0 (full stop) and 1 (full speed).",
+    )
+    parser.add_argument(
+        "--local_model",
+        type=str,
+        help="Path to local model. If specified, bypasses artifacts.",
     )
     # TODO add policy as a param
     return parser.parse_args()
