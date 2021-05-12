@@ -99,7 +99,7 @@ def drive(car, camera, model_trt, config):
 
             is_done = frame_count == config.framerate * config.debug_seconds
             if is_done:
-                logging.debug("frame count: ", frame_count)
+                logging.debug(f"frame count: {frame_count}")
                 logging.debug("end debug")
                 break
 
