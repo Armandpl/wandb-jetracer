@@ -37,7 +37,7 @@ def main(args):
     ) as run:
         setup_logging()
 
-        logging.info("downloading non optimized model")
+        logging.info("Downloading non optimized model")
         artifact = run.use_artifact("model:latest")
         artifact_dir = artifact.download()
 
@@ -52,7 +52,7 @@ def main(args):
         # TODO
 
         # save the model for inference
-        logging.info("saving model and uploading it to wandb...")
+        logging.info("Saving model and uploading it to wandb...")
         torch.save(model_trt.state_dict(), "trt-model.pth")
 
         trt_artifact = wandb.Artifact("trt-model", type="model")
