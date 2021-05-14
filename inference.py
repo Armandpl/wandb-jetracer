@@ -4,6 +4,7 @@ import os
 import time
 
 import cv2
+from jtop import jtop
 import torch
 import wandb
 
@@ -14,7 +15,7 @@ from utils.utils import setup_logging
 from torch2trt import TRTModule
 
 THROTTLE_GAIN = -1
-STEERING_GAIN = -1
+STEERING_GAIN = -2
 IMG_SIZE = 224
 
 
@@ -71,9 +72,19 @@ def show_label(image, coordinates):
     return image
 
 
+def format_jetson_stats(stats):
+    s_metrics = ["GPU", "Temp GPU", "Temp CPU", "power avg", "power cur"]
+    system_stats = {k: stats[k] for k in s_metrics}
+
+    return system_stats
+
+
 def drive(car, camera, model_trt, config):
     logging.debug("Debug mode enabled")
     logging.info("Starting to drive")
+
+    jetson = jtop()
+    jetson.start()
 
     frame_count = 0
 
@@ -103,16 +114,18 @@ def drive(car, camera, model_trt, config):
                 logging.debug("end debug")
                 break
 
+        system_stats = format_jetson_stats(jetson.stats)
+
         inference_end = time.time()
         inference_seconds = (inference_end - inference_start)
 
         log = {
             "inference/seconds": inference_seconds,
             "car/steering": car.steering,
-            "car/throttle": car.throttle,
+            "car/throttle": car.throttle
         }
 
-        wandb.log({**log, **debug_log})
+        wandb.log({**log, **debug_log, **system_stats})
 
 
 def main(args):
@@ -155,7 +168,7 @@ def parse_args():
         "--debug_seconds",
         type=int,
         default=120,
-        help="how long should it run for (in seconds)",
+        help="How long should it run for (in seconds)",
     )
     parser.add_argument(
         "--debug_freq",
@@ -185,7 +198,7 @@ def parse_args():
     parser.add_argument(
         "--local_model",
         type=str,
-        help="Path to local model. If specified, bypasses artifacts.",
+        help="Path to local model. Bypasses artifacts if specified.",
     )
     # TODO add policy as a param
     return parser.parse_args()
