@@ -5,6 +5,8 @@ import time
 
 import cv2
 from jtop import jtop
+from mpu9250_jmdev.registers import *
+from mpu9250_jmdev.mpu_9250 import MPU9250
 import torch
 import wandb
 
@@ -40,7 +42,20 @@ def setup(config):
         width=IMG_SIZE, height=IMG_SIZE, capture_fps=config.framerate
     )
 
-    return car, camera, model_trt
+    logging.info("Setting up MPU9250")
+    mpu = MPU9250(
+        address_ak=AK8963_ADDRESS,
+        address_mpu_master=MPU9050_ADDRESS_68,  # In 0x68 Address
+        address_mpu_slave=None,
+        bus=0,  # TODO set that in config file
+        gfs=GFS_1000,
+        afs=AFS_8G,
+        mfs=AK8963_BIT_16,
+        mode=AK8963_MODE_C100HZ)
+
+    mpu.configure()  # Apply the settings to the registers.
+
+    return car, camera, mpu, model_trt
 
 
 def control_policy(road_center, config):
@@ -79,7 +94,28 @@ def format_jetson_stats(stats):
     return system_stats
 
 
-def drive(car, camera, model_trt, config):
+def read_mpu(mpu):
+    accel_x, accel_y, accel_z = mpu.readAccelerometerMaster()
+    gyro_x, gyro_y, gyro_z = mpu.readGyroscopeMaster()
+    magneto_x, magneto_y, magneto_z = mpu.readMagnetometerMaster()
+
+    # TODO: doesn't feel very pythonic, fix that
+    return {
+        "car/accelerometer_x": accel_x,
+        "car/accelerometer_y": accel_y,
+        "car/accelerometer_z": accel_z,
+
+        "car/gyrosope_x": gyro_x,
+        "car/gyroscope_y": gyro_y,
+        "car/gyroscope_z": gyro_z,
+
+        "car/magnetometer_x": magneto_x,
+        "car/magnetometer_y": magneto_y,
+        "car/magnetometer_z": magneto_z,
+    }
+
+
+def drive(car, camera, mpu, model_trt, config):
     logging.debug("Debug mode enabled")
     logging.info("Starting to drive")
 
@@ -96,6 +132,7 @@ def drive(car, camera, model_trt, config):
         if config.debug:
             unprocessed = image.copy()
 
+        imu_values = read_mpu(mpu)
         x, y = infer(image, model_trt)
         car.throttle, car.steering = control_policy((x, y), config)
 
@@ -125,7 +162,7 @@ def drive(car, camera, model_trt, config):
             "car/throttle": car.throttle
         }
 
-        wandb.log({**log, **debug_log, **system_stats})
+        wandb.log({**log, **debug_log, **system_stats, **imu_values})
 
 
 def main(args):
@@ -139,10 +176,10 @@ def main(args):
         config = run.config
         setup_logging(config)
 
-        car, camera, model_trt = setup(config)
+        car, camera, mpu, model_trt = setup(config)
 
         try:
-            drive(car, camera, model_trt, config)
+            drive(car, camera, mpu, model_trt, config)
         except KeyboardInterrupt:
             pass
 

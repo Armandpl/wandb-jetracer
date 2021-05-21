@@ -10,6 +10,24 @@ from utils.utils import setup_logging
 from torch2trt import torch2trt
 
 
+def convert(model_pth, model_architecture, model_out_dims):
+    logging.info("Creating model architecture")
+    model = torchvision.models.__dict__[model_architecture](pretrained=False)
+
+    model.fc = torch.nn.Linear(model.fc.in_features, model_out_dims)
+    model = model.cuda().eval().half()
+
+    model.load_state_dict(torch.load(model_pth))
+
+    # dummy input
+    data = torch.zeros((1, 3, 224, 224)).cuda().half()
+
+    logging.info("Optimizing model...")
+    model_trt = torch2trt(model, [data], fp16_mode=True)
+
+    return model_trt
+
+
 def main(args):
     with wandb.init(
         project=args.project,
@@ -19,34 +37,22 @@ def main(args):
     ) as run:
         setup_logging()
 
-        logging.info("downloading non optimized model")
+        logging.info("Downloading non optimized model")
         artifact = run.use_artifact("model:latest")
         artifact_dir = artifact.download()
 
-        logging.info("creating model architecture")
         # fetching the model architecture from the producer run
         producer_run = artifact.logged_by()
-        model = torchvision.models.__dict__[
-            producer_run.config["architecture"]
-        ](pretrained=False)
+        model_architecture = producer_run.config["architecture"]
+        model_pth = os.path.join(artifact_dir, "model.pth")
 
-        model.fc = torch.nn.Linear(model.fc.in_features, 2)
-        model = model.cuda().eval().half()
-        model.load_state_dict(
-            torch.load(os.path.join(artifact_dir, "model.pth"))
-        )
-
-        # dummy input
-        data = torch.zeros((1, 3, 224, 224)).cuda().half()
-
-        print("optimizing model...")
-        model_trt = torch2trt(model, [data], fp16_mode=True)
+        model_trt = convert(model_pth, model_architecture, 2)
 
         # evaluate model
         # TODO
 
         # save the model for inference
-        print("saving model and uploading it to wandb...")
+        logging.info("Saving model and uploading it to wandb...")
         torch.save(model_trt.state_dict(), "trt-model.pth")
 
         trt_artifact = wandb.Artifact("trt-model", type="model")
