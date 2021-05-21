@@ -42,7 +42,7 @@ class ImageLabeller:
             self.current_img = cv2.imread(self.current_path, 1)
 
             # displaying the image
-            cv2.imshow("image", self.current_img)
+            imshow_fullscreen(self.current_img)
 
             # setting mouse handler for the image
             # and calling the click_event() function
@@ -72,6 +72,16 @@ class ImageLabeller:
             tmp = self.current_img.copy()
             cv2.circle(tmp, (x, y), 5, (0, 255, 0), 2)
             cv2.imshow("image", tmp)
+
+
+def imshow_fullscreen(img):
+    cv2.namedWindow("image", cv2.WND_PROP_FULLSCREEN)
+    cv2.setWindowProperty(
+        "image",
+        cv2.WND_PROP_FULLSCREEN,
+        cv2.WINDOW_FULLSCREEN
+    )
+    cv2.imshow("image", img)
 
 
 def label_img(x, y, path):
