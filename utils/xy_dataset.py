@@ -14,17 +14,24 @@ class XYDataset(torch.utils.data.Dataset):
     def __init__(self, directory, train=True):
         super(XYDataset, self).__init__()
         self.directory = directory
-        self.transform = transforms.Compose(
-            [
-                transforms.ColorJitter(0.2, 0.2, 0.2, 0.2),
-                transforms.Resize((224, 224)),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
-                ),
-            ]
-        )
+        if train:
+            self.transform = transforms.Compose(
+                [
+                    transforms.ColorJitter(0.2, 0.2, 0.2, 0.2),
+                    transforms.Resize((224, 224)),
+                    transforms.ToTensor(),
+                ]
+            )
+        else:
+            self.transform = transforms.Compose(
+                [
+                    transforms.Resize((224, 224)),
+                    transforms.ToTensor(),
+                ]
+            )
+
         self.refresh()
+
         # augment the training set only
         self.random_hflip = train
 
