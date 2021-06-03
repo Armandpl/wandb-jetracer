@@ -1,4 +1,4 @@
-name: Project Tests
+name: Tests
 on:
   push:
     branches:
