@@ -20,8 +20,7 @@ jobs:
         uses: s-weigand/setup-conda@v1
       - name: Install dependencies
         run: |
-          conda env update -f labelling_env.yml
-          pip install pytest pyfakefs
+          $CONDA/bin/conda env update -f labelling_env.yml --name base
       - name: Test with pytest
         id: tests
         run: python -m pytest -vv
