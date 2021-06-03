@@ -21,6 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           conda env update -f labelling_env.yml
+          pip install pytest pyfakefs
       - name: Test with pytest
         id: tests
         run: python -m pytest -vv
