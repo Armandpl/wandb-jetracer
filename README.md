@@ -1,4 +1,4 @@
-# Jetracer + WandB
+# Jetracer + WandB [![tests](https://github.com/Armandpl/wandb_jetracer/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Armandpl/wandb_jetracer/actions/workflows/ci.yml)
 
 - [wandb dashboard](https://wandb.ai/armandpl2/wandb-jetracer)  
 - [notion doc](https://www.notion.so/wandbai/Self-Driving-RC-Car-25ec247621094e998a6ddbb7ee90ec93)  
