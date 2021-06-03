@@ -22,4 +22,4 @@ jobs:
           pip install pytest pyfakefs .
       - name: Test with pytest
         id: tests
-        run: pytest -vv
+        run: python -m pytest -vv

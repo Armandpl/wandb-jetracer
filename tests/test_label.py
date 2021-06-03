@@ -1,6 +1,6 @@
 import os
 
-from wandb_jetracer.label import label_img
+from label import label_img
 
 
 def test_label_img(fs):

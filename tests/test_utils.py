@@ -2,9 +2,9 @@ from collections import namedtuple
 import logging
 import os
 
-from wandb_jetracer.utils.utils import (make_dirs,
-                                        split_list_by_pct,
-                                        setup_logging)
+from utils.utils import (make_dirs,
+                         split_list_by_pct,
+                         setup_logging)
 
 
 def test_make_dirs(fs):
