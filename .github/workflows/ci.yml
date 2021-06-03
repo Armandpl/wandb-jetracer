@@ -17,10 +17,10 @@ jobs:
         with:
           python-version: 3.7
       - name: Set up conda
-      - uses: s-weigand/setup-conda@v1
-      - name: Install dependencies
+        uses: s-weigand/setup-conda@v1
         with:
           activate-conda: false
+      - name: Install dependencies
         run: |
           conda create -f labelling_env.yml
           conda activate labelling
