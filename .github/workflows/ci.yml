@@ -27,6 +27,3 @@ jobs:
       - name: Generate badge
         if: steps.tests.outcome == 'success'
         run: anybadge --label=pipeline --value=passing --file=pipeline.svg passing=green failing=red
-        else:
-        run: anybadge --label=pipeline --value=failing --file=pipeline.svg passing=green failing=red
-
