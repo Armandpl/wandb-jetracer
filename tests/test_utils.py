@@ -13,4 +13,5 @@ def test_split_list_by_pct():
     new_list = split_list_by_pct(list, pcts)
 
     # Assert
-    assert new_list == [[1, 2, 3, 4, 5, 6, 7, 8], [9, 10]]
+    # assert new_list == [[1, 2, 3, 4, 5, 6, 7, 8], [9, 10]]
+    assert 1 == 0
