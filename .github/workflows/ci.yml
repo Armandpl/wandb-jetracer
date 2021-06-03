@@ -19,6 +19,14 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest
+          pip install pytest anybadge
       - name: Test with pytest
+        id: tests
         run: cd tests && pytest -vv
+        continue-on-error: true
+      - name: Generate badge
+        if: steps.tests.outcome == 'success'
+        run: anybadge --label=pipeline --value=passing --file=pipeline.svg passing=green failing=red
+        else:
+        run: anybadge --label=pipeline --value=failing --file=pipeline.svg passing=green failing=red
+
