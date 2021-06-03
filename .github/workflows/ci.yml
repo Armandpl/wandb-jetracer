@@ -23,7 +23,3 @@ jobs:
       - name: Test with pytest
         id: tests
         run: cd tests && pytest -vv
-        continue-on-error: true
-      - name: Generate badge
-        if: steps.tests.outcome == 'success'
-        run: anybadge --label=pipeline --value=passing --file=pipeline.svg passing=green failing=red
