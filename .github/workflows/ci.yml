@@ -22,7 +22,7 @@ jobs:
           activate-conda: false
       - name: Install dependencies
         run: |
-          conda create -f labelling_env.yml
+          conda env create -f labelling_env.yml
           conda activate labelling
       - name: Test with pytest
         id: tests
