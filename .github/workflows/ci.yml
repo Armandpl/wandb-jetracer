@@ -20,11 +20,11 @@ jobs:
         uses: s-weigand/setup-conda@v1
       - name: Install dependencies
         run: |
-          $CONDA/bin/conda env update -f labelling_env.yml --name base && \
-		  pip install pytest-cov
+          $CONDA/bin/conda env update -f labelling_env.yml --name base
       - name: Test with pytest
         id: tests
         run: |
+		  pip install pytest-cov
 		  python -m pytest -vv --cov=./ --cov-report=xml
 	  - name: Upload coverage to Codecov
 	    uses: codecov/codecov-action@v1
