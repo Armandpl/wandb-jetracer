@@ -20,7 +20,7 @@ jobs:
         uses: s-weigand/setup-conda@v1
       - name: Install dependencies
         run: |
-          $CONDA/bin/conda env update -f labelling_env.yml --name base
+          $CONDA/bin/conda env update -f labelling_env.yml --name base && \
 		  pip install pytest-cov
       - name: Test with pytest
         id: tests
