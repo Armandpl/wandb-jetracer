@@ -111,7 +111,8 @@ def main(args):
         setup_logging(config)
 
         # download dataset
-        artifact_loc = f"{config.entity}/{config.project}/{config.dataset}:latest"
+        artifact_loc = f"{config.entity}/{config.project}/" +\
+            f"{config.dataset}:latest"
         logging.info(f"downloading {artifact_loc}")
         dataset = run.use_artifact(artifact_loc, type="dataset")
         artifact_dir = dataset.download()
