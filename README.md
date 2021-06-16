@@ -12,6 +12,8 @@ Quick intro to the project
 
 ## Some sort of feature list? + include a screenshot of the wandb artifacts graphs
 
+## Testing
+
 ## Footnote
 Feel free to open GitHub issues if you have any questions.
 
