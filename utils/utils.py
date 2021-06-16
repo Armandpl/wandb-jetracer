@@ -1,6 +1,8 @@
 import logging
 import os
 
+import cv2
+
 
 def make_dirs(output_dataset):
     out_dirs = [os.path.join(output_dataset, split)
@@ -28,3 +30,29 @@ def setup_logging(config=None):
         format='%(levelname)s: %(message)s',
         level=logging_level
     )
+
+
+def show_label(image, coordinates, color=(0, 255, 0)):
+    """
+    Show a circle at x, y coordinates on image
+    x, y belong to [-1, 1]
+    """
+    img_h, img_w, _ = image.shape
+    x, y = coordinates
+
+    # shift x, y to be between 0 and 1
+    x = int((x + 1) / 2 * img_w)
+    y = int((y + 1) / 2 * img_h)
+
+    cv2.circle(image, (x, y), 5, color, 2)
+
+    return image
+
+
+def torch2cv2(tensor):
+    img = tensor.permute(1, 2, 0).cpu().numpy()*255
+    img = cv2.cvtColor(
+                img, cv2.COLOR_BGR2RGB
+                )
+
+    return img
