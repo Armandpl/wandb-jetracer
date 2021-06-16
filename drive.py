@@ -136,9 +136,6 @@ def drive(car, camera, mpu, model_trt, config):
         inference_start = time.time()
         debug_log = {}
 
-        if config.debug:
-            unprocessed = image.copy()
-
         imu_values = read_mpu(mpu)
         x, y = infer(image, model_trt)
         car.throttle, car.steering = control_policy((x, y), config)
@@ -147,9 +144,9 @@ def drive(car, camera, mpu, model_trt, config):
             frame_count += 1
             if frame_count % config.debug_freq == 0:
                 logging.debug("logging image")
-                unprocessed = show_label(unprocessed, (x, y))
+                image = show_label(image, (x, y))
                 debug_log = {
-                    "inference/frame": wandb.Image(unprocessed),
+                    "inference/frame": wandb.Image(image),
                 }
 
             is_done = frame_count == config.framerate * config.debug_seconds
