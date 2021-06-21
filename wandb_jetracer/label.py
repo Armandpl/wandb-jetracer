@@ -5,7 +5,7 @@ import os
 import cv2
 import wandb
 
-from utils.utils import setup_logging
+from wandb_jetracer.utils.utils import setup_logging
 
 
 class ImageLabeller:
