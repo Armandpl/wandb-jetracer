@@ -32,5 +32,6 @@ Feel free to open GitHub issues if you have any questions.
 
 todo:
 - button to go to the colab notebook
+- [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Armandpl/wandb_jetracer/blob/master/wandb_jetracer_training.ipynb)
 - link to the video
 - describe the pipeline in details
