@@ -1,4 +1,5 @@
-# 🏁🏎️💨 = W&B ➕ NVIDIA Jetracer [![tests](https://github.com/Armandpl/wandb_jetracer/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Armandpl/wandb_jetracer/actions/workflows/ci.yml) [![flake8 Lint](https://github.com/Armandpl/wandb_jetracer/actions/workflows/lint.yml/badge.svg)](https://github.com/Armandpl/wandb_jetracer/actions/workflows/lint.yml) [![codecov](https://codecov.io/gh/Armandpl/wandb-jetracer/branch/master/graph/badge.svg?token=ZWFFBNQNWB)](https://codecov.io/gh/Armandpl/wandb_jetracer)
+# 🏁🏎️💨 = W&B ➕ NVIDIA Jetracer  
+[![tests](https://github.com/Armandpl/wandb_jetracer/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Armandpl/wandb_jetracer/actions/workflows/ci.yml) [![flake8 Lint](https://github.com/Armandpl/wandb_jetracer/actions/workflows/lint.yml/badge.svg)](https://github.com/Armandpl/wandb_jetracer/actions/workflows/lint.yml) [![codecov](https://codecov.io/gh/Armandpl/wandb-jetracer/branch/master/graph/badge.svg?token=ZWFFBNQNWB)](https://codecov.io/gh/Armandpl/wandb_jetracer)
 
 <p align="center"><img src="https://raw.githubusercontent.com/Armandpl/wandb-jetracer/master/assets/header.png"/></p>
 <p align="center"><i>A picture of the car along with it's POV</i></p>
