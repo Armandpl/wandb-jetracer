@@ -20,8 +20,6 @@ def collect_images(camera, output_dir, config):
         cv2.imwrite(os.path.join(output_dir, fname), image)
 
 
-
-
 def main(args):
     with wandb.init(
         project=args.project,
