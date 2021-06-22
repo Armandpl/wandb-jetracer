@@ -29,19 +29,11 @@ They all relie on different dependencies:
 
 ## Testing
 
+
 ## Footnote
 Feel free to open GitHub issues if you have any questions!
 
 ## Ressources
-- Donkey car
-- a1k0n repo?
-- circuit launch?
-- [wandb dashboard](https://wandb.ai/armandpl2/wandb-jetracer)  
-- [notion doc](https://www.notion.so/wandbai/Self-Driving-RC-Car-25ec247621094e998a6ddbb7ee90ec93)  
-- [original nvidia project](https://github.com/NVIDIA-AI-IOT/jetracer)  
-
-todo:
-- button to go to the colab notebook
-- 
-- link to the video
-- describe the pipeline in details
+- [Donkey car](donkeycar.com)
+- [WandB dashboard](https://wandb.ai/wandb/racecar)  
+- [NVIDIA Jetracer](https://github.com/NVIDIA-AI-IOT/jetracer)  
