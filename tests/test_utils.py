@@ -4,7 +4,21 @@ import os
 
 from wandb_jetracer.utils.utils import (make_dirs,
                                         split_list_by_pct,
-                                        setup_logging)
+                                        setup_logging,
+                                        label_img)
+
+
+def test_label_img(fs):
+    path = "unique-id.jpg"
+    fs.create_file(path)
+
+    path = label_img(10, 20, path)
+
+    assert os.path.exists("10_20_unique-id.jpg")
+
+    label_img(30, 40, path)
+
+    assert os.path.exists("30_40_unique-id.jpg")
 
 
 def test_make_dirs(fs):

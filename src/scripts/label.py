@@ -5,7 +5,7 @@ import os
 import cv2
 import wandb
 
-from wandb_jetracer.utils.utils import setup_logging
+from wandb_jetracer.utils.utils import setup_logging, label_img
 
 
 class ImageLabeller:
@@ -82,20 +82,6 @@ def imshow_fullscreen(img):
         cv2.WINDOW_FULLSCREEN
     )
     cv2.imshow("image", img)
-
-
-def label_img(x, y, path):
-    # save coordinates in filename logging("labelled {path}")
-    fname = os.path.basename(path)
-    directory = os.path.dirname(path)
-
-    fname = fname.split("_")[-1]
-    fname = f"{x}_{y}_{fname}"
-    new_path = os.path.join(directory, fname)
-    os.rename(path, new_path)
-    logging.debug(f"Rename {path} to {new_path}")
-
-    return new_path
 
 
 def main(args):

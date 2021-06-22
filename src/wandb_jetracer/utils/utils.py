@@ -1,5 +1,6 @@
 import logging
 import os
+import uuid
 
 import cv2
 
@@ -18,6 +19,25 @@ def split_list_by_pct(data, pcts):
 
     it = iter(data)
     return [[next(it) for _ in range(size)] for size in sizes]
+
+
+def create_img_name():
+    return str(uuid.uuid1()) + ".jpg"
+
+
+def label_img(x, y, path):
+    """ save x, y coordinates in filename"""
+
+    fname = os.path.basename(path)
+    directory = os.path.dirname(path)
+
+    fname = fname.split("_")[-1]
+    fname = f"{x}_{y}_{fname}"
+    new_path = os.path.join(directory, fname)
+    os.rename(path, new_path)
+    logging.debug(f"Rename {path} to {new_path}")
+
+    return new_path
 
 
 def setup_logging(config=None):

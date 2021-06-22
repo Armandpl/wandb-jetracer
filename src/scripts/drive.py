@@ -19,12 +19,12 @@ import wandb
 
 from jetcam.csi_camera import CSICamera
 from jetracer.nvidia_racecar import NvidiaRacecar
-from utils.xy_dataset import preprocess
-from utils.utils import setup_logging
+from wandb_jetracer.utils.xy_dataset import preprocess
+from wandb_jetracer.utils.utils import setup_logging, show_label
 from torch2trt import TRTModule
 
 THROTTLE_GAIN = -1
-STEERING_GAIN = -2
+STEERING_GAIN = -2  # TODO: add that to the config
 IMG_SIZE = 224
 
 
@@ -81,19 +81,6 @@ def infer(image, model_trt):
     return x, y
 
 
-def show_label(image, coordinates):
-    x, y = coordinates
-
-    x = int((x + 1) / 2 * 224)
-    y = int((y + 1) / 2 * 224)
-    cv2.circle(image, (x, y), 5, (0, 255, 0), 2)
-    image = cv2.cvtColor(
-        image, cv2.COLOR_BGR2RGB
-    )
-
-    return image
-
-
 def format_jetson_stats(stats):
     s_metrics = ["GPU", "Temp GPU", "Temp CPU", "power avg", "power cur"]
     system_stats = {k: stats[k] for k in s_metrics}
@@ -145,6 +132,9 @@ def drive(car, camera, mpu, model_trt, config):
             if frame_count % config.debug_freq == 0:
                 logging.debug("logging image")
                 image = show_label(image, (x, y))
+                image = cv2.cvtColor(
+                    image, cv2.COLOR_BGR2RGB
+                )
                 debug_log = {
                     "inference/frame": wandb.Image(image),
                 }
@@ -241,7 +231,7 @@ def parse_args():
         type=str,
         help="Path to local model. Bypasses artifacts if specified.",
     )
-    # TODO add policy as a param
+    # TODO add model version as param
     return parser.parse_args()
 
 

@@ -2,14 +2,13 @@ import argparse
 import logging
 import os
 import sys
-import uuid
 
 import cv2
 from tqdm import tqdm
 import wandb
 
 from jetcam.csi_camera import CSICamera
-from utils.utils import setup_logging
+from wandb_jetracer.utils.utils import setup_logging, create_img_name
 
 
 def collect_images(camera, output_dir, config):
@@ -21,8 +20,6 @@ def collect_images(camera, output_dir, config):
         cv2.imwrite(os.path.join(output_dir, fname), image)
 
 
-def create_img_name():
-    return str(uuid.uuid1()) + ".jpg"
 
 
 def main(args):
