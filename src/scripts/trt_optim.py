@@ -6,7 +6,7 @@ import torch
 import torchvision
 import wandb
 
-from utils.utils import setup_logging
+from wandb_jetracer.utils.utils import setup_logging
 from torch2trt import torch2trt
 
 
