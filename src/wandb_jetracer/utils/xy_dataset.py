@@ -88,5 +88,5 @@ def preprocess(image):
     device = torch.device('cuda')
     image = PIL.Image.fromarray(image)
     image = transforms.functional.to_tensor(image).to(device)
-    image.sub_(mean[:, None, None]).div_(std[:, None, None])
+    # image.sub_(mean[:, None, None]).div_(std[:, None, None])
     return image[None, ...]
