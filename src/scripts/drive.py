@@ -16,6 +16,8 @@ from mpu9250_jmdev.registers import (
 from mpu9250_jmdev.mpu_9250 import MPU9250
 import torch
 import wandb
+import yolov5
+from yolov5.utils.general import non_max_suppression
 
 from jetcam.csi_camera import CSICamera
 from jetracer.nvidia_racecar import NvidiaRacecar
@@ -34,7 +36,7 @@ def setup(config):
 
     if config.local_model is None:
         logging.info("Downloading latest optimized model...")
-        artifact = wandb.use_artifact('trt-model:latest')
+        artifact = wandb.use_artifact(f'trt-model:{config.model_version}')
         artifact_dir = artifact.download()
         model_trt.load_state_dict(torch.load(
             os.path.join(artifact_dir, 'trt-model.pth')
@@ -42,6 +44,12 @@ def setup(config):
     else:
         logging.info(f"Using local model: {config.local_model}")
         model_trt.load_state_dict(torch.load(config.local_model))
+
+    yolo_model = None
+    if config.yolo:
+        logging.info("Setting up yolo model")
+        yolo_model = yolov5.load('yolov5s.pt')
+        yolo_model.half()
 
     logging.info("Setting up car and camera")
     car = NvidiaRacecar()
@@ -62,23 +70,40 @@ def setup(config):
 
     mpu.configure()  # Apply the settings to the registers.
 
-    return car, camera, mpu, model_trt
+    return car, camera, mpu, model_trt, yolo_model
 
 
-def control_policy(road_center, config):
+def control_policy(road_center, objects, config):
     x, y = road_center
     steering = x * STEERING_GAIN  # *(y+1)/2
     throttle = config.throttle * THROTTLE_GAIN
+    # if objects is not None:
+    #     for det in objects:
+    #         if len(det):
+    #             for *xyxy, conf, cls in reversed(det):
+    #                  if int(cls) == 11:
+    #                     logging.debug("Braking")
+    #                     throttle = -1 * THROTTLE_GAIN
 
     return throttle, steering
 
 
-def infer(image, model_trt):
+def infer(image, model_trt, yolo_model=None):
     image = preprocess(image).half()
+
+    objects = None
+    if yolo_model is not None:
+        objects = yolo_model(image, size=IMG_SIZE)[0]
+        objects = non_max_suppression(
+            objects,
+            yolo_model.conf,
+            iou_thres=yolo_model.iou
+        )
+
     output = model_trt(image).squeeze()  # .detach().cpu().numpy().flatten()
     x, y = float(output[0]), float(output[1])
 
-    return x, y
+    return (x, y), objects
 
 
 def format_jetson_stats(stats):
@@ -109,7 +134,41 @@ def read_mpu(mpu):
     }
 
 
-def drive(car, camera, mpu, model_trt, config):
+def format_detections(yolo_objects, names):
+    box_data = []
+    # add bboxes
+    for det in yolo_objects:
+        if len(det):
+            for *xyxy, conf, cls in reversed(det):
+                c = int(cls)  # integer class
+                label = names[c]
+                minX, minY, maxX, maxY = xyxy
+                box = {
+                    "position": {
+                        "minX": int(minX),
+                        "maxX": int(maxX),
+                        "minY": int(minY),
+                        "maxY": int(maxY)
+                    },
+                    "domain": "pixel",
+                    "class_id": c,
+                    "box_caption": label,
+                    "scores": {
+                        "conf": float(conf),
+                    }
+                }
+
+                box_data.append(box)
+    boxes = {
+        "predictions": {
+            "box_data": box_data
+        }
+    }
+
+    return boxes
+
+
+def drive(car, camera, mpu, model_trt, yolo_model, config):
     logging.debug("Debug mode enabled")
     logging.info("Starting to drive")
 
@@ -124,19 +183,29 @@ def drive(car, camera, mpu, model_trt, config):
         debug_log = {}
 
         imu_values = read_mpu(mpu)
-        x, y = infer(image, model_trt)
-        car.throttle, car.steering = control_policy((x, y), config)
+        road_center, objects = infer(image, model_trt, yolo_model)
+        car.throttle, car.steering = control_policy(
+            road_center,
+            objects,
+            config
+        )
 
         if config.debug:
             frame_count += 1
             if frame_count % config.debug_freq == 0:
                 logging.debug("logging image")
-                image = show_label(image, (x, y))
+                image = show_label(image, road_center)
                 image = cv2.cvtColor(
                     image, cv2.COLOR_BGR2RGB
                 )
+
+                boxes = None
+                if config.yolo:
+                    boxes = format_detections(objects, yolo_model.names)
+                    logging.debug(boxes)
+
                 debug_log = {
-                    "inference/frame": wandb.Image(image),
+                    "inference/frame": wandb.Image(image, boxes=boxes),
                 }
 
             is_done = frame_count == config.framerate * config.debug_seconds
@@ -170,10 +239,10 @@ def main(args):
         config = run.config
         setup_logging(config)
 
-        car, camera, mpu, model_trt = setup(config)
+        car, camera, mpu, model_trt, yolo_model = setup(config)
 
         try:
-            drive(car, camera, mpu, model_trt, config)
+            drive(car, camera, mpu, model_trt, yolo_model, config)
         except KeyboardInterrupt:
             pass
 
@@ -189,6 +258,12 @@ def parse_args():
         type=int,
         default=10,
         help="How many images to analyze per second"
+    )
+    parser.add_argument(
+        "--yolo",
+        action="store_true",
+        help="If specified, will run images through yolo \
+             and log predictions to wandb.",
     )
     parser.add_argument(
         "-d",
@@ -225,6 +300,13 @@ def parse_args():
         type=float,
         default=0.005,
         help="Car throttle. Between 0 (full stop) and 1 (full speed).",
+    )
+    parser.add_argument(
+        "-v",
+        "--model_version",
+        type=str,
+        default=":latest",
+        help="Which artifacts version to use.",
     )
     parser.add_argument(
         "--local_model",
