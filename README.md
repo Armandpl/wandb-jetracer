@@ -18,12 +18,18 @@ The repo is meant to be used by running (and modifying!) scripts under `src/wand
 4. `trt_optim` is meant to be ran on the car. It will convert the latest trained model to [TensorRT](https://developer.nvidia.com/tensorrt) for inference.
 5. `drive.py` will take the optimized model and use it to drive the car. It will also log sensor data (IMU, Camera), system metrics ([jetson stats](https://github.com/rbonghi/jetson_stats), inference time) as well as the control signal to WandB. This helps with monitoring the model's perfomances in production.
 
+## Building the car
+Check out [NVIDIA Jetracer](https://github.com/NVIDIA-AI-IOT/jetracer).
+
 ## Setup and dependencies
 These scripts are run on three different types of machine: the actual [embedded jetson nano computer](https://developer.nvidia.com/embedded/jetson-nano-developer-kit) on the car, a machine used for labelling and a colab instance used for training.  
 They all relie on different dependencies:
 - Training dependencies are installed in the Colab notebook so you don't need to worry about those.
 - Labelling dependencies can be installed in a conda env using `conda create -f labelling_env.yml`
 - Dependencies for the car are slightly trickier to get right, you'll find instructions [here](https://github.com/Armandpl/wandb-jetracer/blob/master/JETSON_SETUP.md). Feel free to open issues if you run into troubles!
+
+## Disclaimer about default throttle values:
+Even though default throttle values are set in the scripts under `/src/scripts` I would recommend testing those while the car is on a stand and it's wheels are not touching the ground. Depending on how your ESC was calibrated a throttle value of 0.0002 might mean going full reverse and your car might fly off into a wall.
 
 ## Testing
 After installing the labelling dependencies, run: ```pytest```
