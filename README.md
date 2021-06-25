@@ -22,7 +22,7 @@ The repo is meant to be used by running (and modifying!) scripts under `src/wand
 Check out [NVIDIA Jetracer](https://github.com/NVIDIA-AI-IOT/jetracer).
 
 ## Setup and dependencies
-These scripts are run on three different types of machine: the actual [embedded jetson nano computer](https://developer.nvidia.com/embedded/jetson-nano-developer-kit) on the car, a machine used for labelling and a colab instance used for training.  
+These scripts are ran on three different types of machine: the actual [embedded jetson nano computer](https://developer.nvidia.com/embedded/jetson-nano-developer-kit) on the car, a machine used for labelling and a colab instance used for training.  
 They all relie on different dependencies:
 - Training dependencies are installed in the Colab notebook so you don't need to worry about those.
 - Labelling dependencies can be installed in a conda env using `conda create -f labelling_env.yml`
@@ -32,7 +32,7 @@ They all relie on different dependencies:
 Even though default throttle values are set in the scripts under `/src/scripts` I would recommend testing those while the car is on a stand and it's wheels are not touching the ground. Depending on how your ESC was calibrated a throttle value of 0.0002 might mean going full reverse and your car might fly off into a wall.
 
 ## Testing
-After installing the labelling dependencies, run: ```pytest```
+After installing the labelling dependencies run ```pytest```
 
 ## Footnote
 Feel free to open GitHub issues if you have any questions!
