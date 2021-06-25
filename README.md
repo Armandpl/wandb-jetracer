@@ -23,18 +23,15 @@ These scripts are run on three different types of machine: the actual [embedded 
 They all relie on different dependencies:
 - Training dependencies are installed in the Colab notebook so you don't need to worry about those.
 - Labelling dependencies can be installed in a conda env using `conda create -f labelling_env.yml`
-- Dependencies for the car are slightly trickier to get right, you'll find instructions [here](). Feel free to open issues if you run into troubles!
-
-
-### Disclaimer about default throttle values -> jetson_setup.md
+- Dependencies for the car are slightly trickier to get right, you'll find instructions [here](https://github.com/Armandpl/wandb-jetracer/blob/master/JETSON_SETUP.md). Feel free to open issues if you run into troubles!
 
 ## Testing
-
+After installing the labelling dependencies, run: ```pytest```
 
 ## Footnote
 Feel free to open GitHub issues if you have any questions!
 
 ## Ressources
 - [Donkey car](donkeycar.com)
-- [WandB dashboard](https://wandb.ai/wandb/racecar)  
+- [WandB dashboard for this project](https://wandb.ai/wandb/racecar)  
 - [NVIDIA Jetracer](https://github.com/NVIDIA-AI-IOT/jetracer)  
