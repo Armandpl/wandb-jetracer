@@ -77,13 +77,6 @@ def control_policy(road_center, objects, config):
     x, y = road_center
     steering = x * STEERING_GAIN  # *(y+1)/2
     throttle = config.throttle * THROTTLE_GAIN
-    # if objects is not None:
-    #     for det in objects:
-    #         if len(det):
-    #             for *xyxy, conf, cls in reversed(det):
-    #                  if int(cls) == 11:
-    #                     logging.debug("Braking")
-    #                     throttle = -1 * THROTTLE_GAIN
 
     return throttle, steering
 
@@ -305,7 +298,7 @@ def parse_args():
         "-v",
         "--model_version",
         type=str,
-        default=":latest",
+        default="latest",
         help="Which artifacts version to use.",
     )
     parser.add_argument(
