@@ -31,12 +31,12 @@ Follow the instructions at [https://docs.donkeycar.com/parts/imu/](https://docs.
 ## 6. Install Jetson Stats
 Follow instructions at [https://github.com/rbonghi/jetson_stats](https://github.com/rbonghi/jetson_stats)
 
-## 5. Link the preinstalled Opencv to your virtual env
+## 7. Link the preinstalled Opencv to your virtual env
 Re-compiling cv2 takes a long time, so you can link the pre-compiled version to your virtualenv.  
 `ln -s /usr/lib/python3.6/dist-packages/cv2/python-3.6/cv2.cpython-
 ite-packages/cv2.cpython-36m-aarch64-linux-gnu.so`
 
-## 6. Install jetracer, torch2trt and jetcam
+## 8. Install jetracer, torch2trt and jetcam
 1. Open a terminal and call the following to install the [JetCam](http://github.com/NVIDIA-AI-IOT/jetcam) Python package.
 
     ```bash
@@ -64,7 +64,7 @@ ite-packages/cv2.cpython-36m-aarch64-linux-gnu.so`
      ~/python-envs/rc/bin/python setup.py install
      ```
 
-## 7. If you intend to use the object detections features from this repo:
+## 9. If you intend to use the object detections features from this repo:
 Install the yolov5 pip package
 `pip install yolov5`
 You might miss libs to install/compile yolov5 dependencies:
