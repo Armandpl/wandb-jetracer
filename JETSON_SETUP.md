@@ -16,6 +16,7 @@ source ~/python-envs/rc/bin/activate
 
 ## 3. Install torch and torchvision
 Follow the instructions at [https://forums.developer.nvidia.com/t/pytorch-for-jetson-version-1-8-0-now-available/](https://forums.developer.nvidia.com/t/pytorch-for-jetson-version-1-8-0-now-available)  
+might also need `https://forums.developer.nvidia.com/t/cannot-install-pytorch/149226/3` for pytorch (from https://forums.developer.nvidia.com/t/cannot-install-pytorch/149226/3)  
 You may have issues installing torchvision in your virtualenv. Try this:  
 ```
 cd torchvision
